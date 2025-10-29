@@ -1,1839 +1,580 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>20 Epic 2-Player Games</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Harvona Study Timer</title>
 
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-            overflow-x: hidden;
-        }
+  <!-- Clash Grotesk from Fontshare -->
+  <link rel="stylesheet" href="https://api.fontshare.com/css?f[]=clash-grotesk@400,600,700&display=swap">
 
-        .container {
-            width: 100%;
-            max-width: 500px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
+  <style>
+    :root{
+      --bg:#f5fbff;
+      --card:#ffffff;
+      --accent:#6aa6ff; /* calm blue */
+      --terracotta:#D07A5A; /* warm terracotta */
+      --plant:#79BFA3; /* soft green */
+      --muted:#7b8790;
+      --glass: rgba(255,255,255,0.7);
+      --radius:18px;
+      --font: 'Clash Grotesk', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    html,body{height:100%;margin:0;font-family:var(--font);background:linear-gradient(180deg,var(--bg) 0%, #eef7ff 100%);-webkit-font-smoothing:antialiased}
+    .app{
+      max-width:980px;margin:18px auto;padding:18px;
+    }
 
-        .header {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            position: relative;
-        }
+    header{
+      display:flex;align-items:center;gap:12px;
+    }
+    .logo{
+      width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#7ad1d8);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(30,60,100,0.08);
+      position:relative; overflow:hidden;
+    }
+    .logo svg{transform:translateY(-4px)}
+    h1{font-size:20px;margin:0}
+    p.lead{color:var(--muted);margin:6px 0 18px;font-size:13px}
 
-        .header h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
+    /* Main layout */
+    .grid{
+      display:grid;grid-template-columns:1fr 360px;gap:16px;
+    }
+    .card{
+      background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:0 6px 18px rgba(20,30,60,0.06);
+    }
 
-        .header p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
+    /* Home (left) */
+    .start-btn{
+      width:100%;padding:18px;border-radius:14px;background:linear-gradient(90deg,var(--accent),#61d1b6);color:white;border:0;font-weight:700;font-size:18px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:12px;
+      box-shadow:0 10px 20px rgba(90,150,255,0.12);transition:transform .12s ease;
+    }
+    .start-btn:active{transform:translateY(2px)}
+    .preset-row{display:flex;gap:8px;margin-top:12px}
+    .preset{padding:8px 12px;border-radius:12px;background:var(--glass);border:1px dashed rgba(120,160,200,0.12);cursor:pointer;font-weight:600}
 
-        .back-btn {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255,255,255,0.3);
-            border: none;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            display: none;
-        }
+    /* Tasks */
+    .tasks{margin-top:18px}
+    .task-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;border:1px solid rgba(0,0,0,0.04);margin-bottom:10px}
+    .task-subject{font-size:15px;font-weight:700}
+    .task-time{margin-left:auto;color:var(--muted);font-weight:600}
+    .bounce{animation:bounce .6s ease}
+    @keyframes bounce{0%{transform:translateY(-6px)}50%{transform:translateY(2px)}100%{transform:translateY(0)}}
 
-        .back-btn.show {
-            display: block;
-        }
+    /* Right column: focus & illustration */
+    .focus-area{display:flex;flex-direction:column;align-items:center;gap:12px}
+    .illustration{width:100%;height:140px;border-radius:12px;background:linear-gradient(180deg, #fff 0%, #f7fcff 100%);display:flex;align-items:center;justify-content:center;overflow:hidden}
+    /* "hand-drawn" plant animation */
+    .plant{width:120px;height:120px;transform-origin:center bottom;animation:plantGrow 10s linear infinite}
+    @keyframes plantGrow{0%{transform:translateY(6px) scale(0.98)}50%{transform:translateY(0) scale(1.02)}100%{transform:translateY(6px) scale(0.98)}}
 
-        .menu {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            padding: 20px;
-            max-height: 70vh;
-            overflow-y: auto;
-        }
+    /* Timer circle */
+    .timer-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px}
+    .progress-ring{width:220px;height:220px;display:grid;place-items:center;position:relative}
+    .time-label{font-size:28px;font-weight:700}
+    .locked-badge{position:absolute;top:12px;left:12px;background:linear-gradient(90deg,var(--terracotta),#f7a58c);color:white;padding:6px 10px;border-radius:999px;font-weight:700;box-shadow:0 6px 14px rgba(208,122,90,0.14)}
 
-        .game-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 20px;
-            border-radius: 15px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
+    /* Overlay & Focus Lock */
+    .overlay{position:fixed;inset:0;background:linear-gradient(90deg,rgba(9,18,40,0.55),rgba(9,18,40,0.4));display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter: blur(3px);display:none}
+    .overlay.show{display:flex}
+    .overlay .box{background:linear-gradient(180deg,#fff,#f8fbff);padding:18px;border-radius:14px;text-align:center;max-width:420px}
+    .overlay .title{font-size:20px;font-weight:800}
+    .overlay p{color:var(--muted);margin-top:8px}
 
-        .game-btn:active {
-            transform: scale(0.95);
-        }
+    /* Confetti (simple) */
+    .confetti{pointer-events:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:10000}
 
-        .game-screen {
-            display: none;
-            padding: 20px;
-            min-height: 400px;
-        }
+    /* Alarm fullscreen */
+    .alarm-screen{position:fixed;inset:0;background:linear-gradient(180deg,#fff3ed,#fff6f2);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:10001}
+    .alarm-screen.show{display:flex}
+    .alarm-screen h2{font-size:26px;margin:6px 0}
+    .alarm-cta{padding:14px 20px;border-radius:12px;background:linear-gradient(90deg,#6ad1b6,#6aa6ff);color:white;font-weight:800;border:0;cursor:pointer;margin-top:12px}
 
-        .game-screen.active {
-            display: block;
-        }
+    footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
 
-        .score-board {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            background: #f0f0f0;
-            padding: 15px;
-            border-radius: 10px;
-        }
-
-        .player-score {
-            text-align: center;
-        }
-
-        .player-score h3 {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .player-score .score {
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .player1 { color: #f5576c; }
-        .player2 { color: #667eea; }
-
-        .game-area {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-small {
-            padding: 10px 20px;
-            font-size: 14px;
-        }
-
-        /* Tic Tac Toe */
-        .ttt-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .ttt-cell {
-            aspect-ratio: 1;
-            background: white;
-            border: 3px solid #ddd;
-            border-radius: 10px;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-        }
-
-        .ttt-cell:hover {
-            background: #f0f0f0;
-        }
-
-        /* Color Match */
-        .color-box {
-            width: 100%;
-            height: 150px;
-            border-radius: 10px;
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .color-options {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .color-btn {
-            padding: 20px;
-            border-radius: 10px;
-            border: none;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            color: white;
-        }
-
-        /* Quick Draw */
-        .draw-area {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin: 15px 0;
-        }
-
-        .draw-square {
-            aspect-ratio: 1;
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .draw-square.p1 {
-            background: #f5576c;
-        }
-
-        .draw-square.p2 {
-            background: #667eea;
-        }
-
-        /* Button Masher */
-        .masher-btn {
-            height: 150px;
-            font-size: 24px;
-            margin: 10px 0;
-        }
-
-        /* Memory Match */
-        .memory-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin: 15px 0;
-        }
-
-        .memory-card {
-            aspect-ratio: 1;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 10px;
-            font-size: 24px;
-            cursor: pointer;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .memory-card.flipped {
-            background: white;
-            border: 2px solid #667eea;
-        }
-
-        .memory-card.matched {
-            background: #4CAF50;
-            cursor: default;
-        }
-
-        /* RPS */
-        .rps-options {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 15px 0;
-        }
-
-        .rps-btn {
-            padding: 20px;
-            font-size: 30px;
-            background: white;
-            border: 3px solid #ddd;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .rps-btn:active {
-            transform: scale(0.9);
-        }
-
-        .rps-result {
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            margin: 20px 0;
-            min-height: 60px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        /* Timer */
-        .timer {
-            text-align: center;
-            font-size: 48px;
-            font-weight: bold;
-            color: #667eea;
-            margin: 20px 0;
-        }
-
-        /* Message */
-        .message {
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin: 15px 0;
-            min-height: 30px;
-        }
-
-        /* Tap buttons */
-        .tap-btn {
-            height: 120px;
-            font-size: 20px;
-            margin: 10px 0;
-            touch-action: manipulation;
-        }
-
-        /* Input */
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-            margin: 10px 0;
-        }
-
-        /* Responsive */
-        @media (max-width: 400px) {
-            .header h1 {
-                font-size: 20px;
-            }
-            .game-btn {
-                padding: 15px;
-                font-size: 12px;
-            }
-        }
-
-        .emoji-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin: 15px 0;
-        }
-
-        .emoji-btn {
-            aspect-ratio: 1;
-            font-size: 30px;
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-
-        .target-display {
-            text-align: center;
-            font-size: 60px;
-            margin: 20px 0;
-            min-height: 80px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 30px;
-            background: #e0e0e0;
-            border-radius: 15px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #f5576c, #f093fb);
-            transition: width 0.3s;
-        }
-    </style>
+    /* small screens */
+    @media (max-width:880px){
+      .grid{grid-template-columns:1fr; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <button class="back-btn" onclick="showMenu()">← Back</button>
-            <h1>🎮 Epic 2-Player Games</h1>
-            <p id="header-subtitle">Choose a game to play!</p>
+  <div class="app">
+    <header>
+      <div class="logo" aria-hidden="true">
+        <!-- small hand-drawn book + clock svg -->
+        <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="12" width="40" height="36" rx="6" fill="#FFF" stroke="rgba(0,0,0,0.08)" />
+          <path d="M46 18h10v18" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+          <circle cx="46" cy="44" r="8" fill="#fff"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Harvona Study Timer</h1>
+        <p class="lead">Cozy focus sessions, locked-in mode, and gentle reminders.</p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div>
+        <div class="card">
+          <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-weight:800">Ready to focus?</div>
+              <div style="color:var(--muted);font-size:13px">Start a session and lock distractions.</div>
+            </div>
+            <div style="text-align:right;color:var(--muted);font-weight:700" id="streak">Streak: 0</div>
+          </div>
+
+          <div style="margin-top:14px">
+            <button class="start-btn" id="startFocusBtn"><span id="startIcon">▶</span> Start Focus (25:00)</button>
+            <div class="preset-row">
+              <div class="preset" data-min="25">25</div>
+              <div class="preset" data-min="50">50</div>
+              <div class="preset" data-min="15">15</div>
+            </div>
+          </div>
+
+          <div class="tasks">
+            <div style="display:flex;align-items:center;gap:8px;margin-top:12px">
+              <input id="taskSubj" placeholder="Subject (e.g., Math)" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06)" />
+              <input id="taskTime" type="time" style="padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06)" />
+              <button id="addTask" style="padding:10px 12px;border-radius:10px;background:var(--accent);color:white;border:0;cursor:pointer">Add</button>
+            </div>
+
+            <div id="taskList" style="margin-top:12px">
+              <!-- tasks appear here -->
+            </div>
+          </div>
         </div>
 
-        <!-- Main Menu -->
-        <div id="menu" class="menu">
-            <button class="game-btn" onclick="startGame(1)">1️⃣ Tic Tac Toe</button>
-            <button class="game-btn" onclick="startGame(2)">🎨 Color Match</button>
-            <button class="game-btn" onclick="startGame(3)">✏️ Quick Draw</button>
-            <button class="game-btn" onclick="startGame(4)">👆 Button Masher</button>
-            <button class="game-btn" onclick="startGame(5)">🧠 Memory Match</button>
-            <button class="game-btn" onclick="startGame(6)">✊ Rock Paper Scissors</button>
-            <button class="game-btn" onclick="startGame(7)">⚡ Reaction Battle</button>
-            <button class="game-btn" onclick="startGame(8)">🔢 Number Guesser</button>
-            <button class="game-btn" onclick="startGame(9)">🎯 Tap War</button>
-            <button class="game-btn" onclick="startGame(10)">🌈 Color Clicker</button>
-            <button class="game-btn" onclick="startGame(11)">💭 Word Race</button>
-            <button class="game-btn" onclick="startGame(12)">➕ Math Duel</button>
-            <button class="game-btn" onclick="startGame(13)">🔄 Pattern Memory</button>
-            <button class="game-btn" onclick="startGame(14)">⚡ Speed Tap</button>
-            <button class="game-btn" onclick="startGame(15)">⭕ Circle Catch</button>
-            <button class="game-btn" onclick="startGame(16)">😀 Emoji Match</button>
-            <button class="game-btn" onclick="startGame(17)">🏃 Fast Fingers</button>
-            <button class="game-btn" onclick="startGame(18)">⏰ Last Click Wins</button>
-            <button class="game-btn" onclick="startGame(19)">🎲 Dice Duel</button>
-            <button class="game-btn" onclick="startGame(20)">🎪 Simon Says</button>
+        <footer>No accounts. All data stays on your device.</footer>
+      </div>
+
+      <div>
+        <div class="card focus-area">
+          <div class="illustration" aria-hidden="true">
+            <!-- simple hand-drawn desk + growing plant -->
+            <svg width="320" height="140" viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" y="0" width="320" height="140" fill="transparent"/>
+              <g transform="translate(30,10)">
+                <rect x="0" y="30" rx="10" width="180" height="80" fill="#fff" stroke="rgba(0,0,0,0.04)"/>
+                <g transform="translate(200,12)">
+                  <!-- plant -->
+                  <g class="plant">
+                    <path d="M10 80 C 30 40, 60 40, 80 80" fill="#79BFA3" stroke="rgba(0,0,0,0.06)"/>
+                    <circle cx="40" cy="34" r="22" fill="#79BFA3"/>
+                    <rect x="30" y="60" width="20" height="22" rx="6" fill="#8BD4B7"/>
+                  </g>
+                </g>
+              </g>
+            </svg>
+          </div>
+
+          <div class="timer-wrap">
+            <div class="progress-ring" id="progressWrap">
+              <div class="locked-badge" id="lockedBadge" style="display:none">Locked In</div>
+              <svg width="220" height="220" viewBox="0 0 120 120">
+                <defs>
+                  <linearGradient id="g1" x1="0" x2="1">
+                    <stop offset="0%" stop-color="#6AA6FF"/>
+                    <stop offset="100%" stop-color="#61D1B6"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="60" cy="60" r="52" fill="transparent" stroke="rgba(20,30,40,0.06)" stroke-width="8"/>
+                <circle id="progressCircle" cx="60" cy="60" r="52" fill="transparent" stroke="url(#g1)" stroke-width="8" stroke-dasharray="327" stroke-dashoffset="327" stroke-linecap="round" transform="rotate(-90 60 60)"></circle>
+                <foreignObject x="20" y="30" width="80" height="80">
+                  <div style="display:flex;align-items:center;justify-content:center" xmlns="http://www.w3.org/1999/xhtml">
+                    <div class="time-label" id="timeLabel">25:00</div>
+                  </div>
+                </foreignObject>
+              </svg>
+            </div>
+
+            <div style="display:flex;gap:8px">
+              <button id="pauseBtn" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);background:transparent;cursor:pointer">Pause</button>
+              <button id="stopBtn" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);background:transparent;cursor:pointer">Stop</button>
+            </div>
+
+            <div style="color:var(--muted);font-size:13px;margin-top:8px">Tip: Add as PWA for better alarm persistence.</div>
+          </div>
         </div>
 
-        <!-- Game Screens -->
-        <div id="game-container"></div>
+        <!-- Alarm screen -->
+        <div class="alarm-screen" id="alarmScreen" role="dialog" aria-modal="true">
+          <h2 id="alarmTitle">Math — It's time!</h2>
+          <p style="color:var(--muted);max-width:360px;text-align:center">Open the app and press "I'm Ready!" to stop the alarm.</p>
+          <button class="alarm-cta" id="alarmStopBtn">I'm Ready!</button>
+        </div>
+
+      </div>
     </div>
+  </div>
 
-    <script>
-        let currentGame = 0;
-        let scores = { p1: 0, p2: 0 };
-        let gameStates = {};
+  <!-- Overlay: shown when user tries to exit during lock -->
+  <div class="overlay" id="overlay">
+    <div class="box">
+      <div class="title">Stay focused!</div>
+      <p>If you try to leave, your session remains locked — finish the time and you’ll be rewarded 🎉</p>
+      <div style="margin-top:12px">
+        <button id="overlayClose" style="padding:10px 12px;border-radius:10px;background:var(--accent);color:white;border:0;cursor:pointer">I will keep going</button>
+      </div>
+    </div>
+  </div>
 
-        function showMenu() {
-            document.getElementById('menu').style.display = 'grid';
-            document.getElementById('game-container').innerHTML = '';
-            document.querySelector('.back-btn').classList.remove('show');
-            document.getElementById('header-subtitle').textContent = 'Choose a game to play!';
-            currentGame = 0;
-        }
+  <!-- confetti container -->
+  <div class="confetti" id="confetti"></div>
 
-        function startGame(gameNum) {
-            currentGame = gameNum;
-            document.getElementById('menu').style.display = 'none';
-            document.querySelector('.back-btn').classList.add('show');
-            
-            const games = [
-                '', 'Tic Tac Toe', 'Color Match', 'Quick Draw', 'Button Masher',
-                'Memory Match', 'Rock Paper Scissors', 'Reaction Battle', 'Number Guesser',
-                'Tap War', 'Color Clicker', 'Word Race', 'Math Duel',
-                'Pattern Memory', 'Speed Tap', 'Circle Catch', 'Emoji Match',
-                'Fast Fingers', 'Last Click Wins', 'Dice Duel', 'Simon Says'
-            ];
-            
-            document.getElementById('header-subtitle').textContent = games[gameNum];
-            
-            const container = document.getElementById('game-container');
-            container.className = 'game-screen active';
-            
-            switch(gameNum) {
-                case 1: loadTicTacToe(); break;
-                case 2: loadColorMatch(); break;
-                case 3: loadQuickDraw(); break;
-                case 4: loadButtonMasher(); break;
-                case 5: loadMemoryMatch(); break;
-                case 6: loadRockPaperScissors(); break;
-                case 7: loadReactionBattle(); break;
-                case 8: loadNumberGuesser(); break;
-                case 9: loadTapWar(); break;
-                case 10: loadColorClicker(); break;
-                case 11: loadWordRace(); break;
-                case 12: loadMathDuel(); break;
-                case 13: loadPatternMemory(); break;
-                case 14: loadSpeedTap(); break;
-                case 15: loadCircleCatch(); break;
-                case 16: loadEmojiMatch(); break;
-                case 17: loadFastFingers(); break;
-                case 18: loadLastClick(); break;
-                case 19: loadDiceDuel(); break;
-                case 20: loadSimonSays(); break;
-            }
-        }
+  <!-- looping audio (you can replace src with your chime file in repo assets) -->
+  <audio id="chime" loop preload="auto">
+    <source src="https://cdn.jsdelivr.net/gh/harvona/harvona-assets/chime.mp3" type="audio/mpeg">
+    <!-- If you host your own chime, replace the src above -->
+  </audio>
 
-        // Game 1: Tic Tac Toe
-        function loadTicTacToe() {
-            gameStates.ttt = { board: Array(9).fill(''), currentPlayer: 'X', gameOver: false };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1 (X)</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2 (O)</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Player 1's turn (X)</div>
-                    <div class="ttt-grid" id="ttt-grid"></div>
-                </div>
-                <button class="btn" onclick="resetTicTacToe()">New Game</button>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-            renderTTTBoard();
-        }
+  <script>
+    /* ======= App State & Utilities ======= */
+    const DEFAULT_MIN = 25;
+    let focusMinutes = DEFAULT_MIN;
+    let totalSeconds = DEFAULT_MIN*60;
+    let secondsLeft = totalSeconds;
+    let timerInterval = null;
+    let locked = false;
+    let streak = parseInt(localStorage.getItem('harvona_streak')||'0',10) || 0;
 
-        function renderTTTBoard() {
-            const grid = document.getElementById('ttt-grid');
-            grid.innerHTML = '';
-            
-            for(let i = 0; i < 9; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'ttt-cell';
-                cell.textContent = gameStates.ttt.board[i];
-                cell.onclick = () => makeTTTMove(i);
-                if(gameStates.ttt.board[i] === 'X') cell.style.color = '#f5576c';
-                if(gameStates.ttt.board[i] === 'O') cell.style.color = '#667eea';
-                grid.appendChild(cell);
-            }
-        }
+    const startBtn = document.getElementById('startFocusBtn');
+    const timeLabel = document.getElementById('timeLabel');
+    const progressCircle = document.getElementById('progressCircle');
+    const lockedBadge = document.getElementById('lockedBadge');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const overlay = document.getElementById('overlay');
+    const overlayClose = document.getElementById('overlayClose');
+    const chime = document.getElementById('chime');
+    const alarmScreen = document.getElementById('alarmScreen');
+    const alarmStopBtn = document.getElementById('alarmStopBtn');
+    const startIcon = document.getElementById('startIcon');
+    const streakEl = document.getElementById('streak');
 
-        function makeTTTMove(index) {
-            if(gameStates.ttt.gameOver || gameStates.ttt.board[index]) return;
-            
-            gameStates.ttt.board[index] = gameStates.ttt.currentPlayer;
-            renderTTTBoard();
-            
-            if(checkTTTWinner()) {
-                const winner = gameStates.ttt.currentPlayer === 'X' ? 1 : 2;
-                document.querySelector('.message').textContent = `Player ${winner} wins! 🎉`;
-                gameStates.ttt.gameOver = true;
-                updateScore(winner);
-            } else if(gameStates.ttt.board.every(cell => cell)) {
-                document.querySelector('.message').textContent = "It's a draw! 🤝";
-                gameStates.ttt.gameOver = true;
-            } else {
-                gameStates.ttt.currentPlayer = gameStates.ttt.currentPlayer === 'X' ? 'O' : 'X';
-                const player = gameStates.ttt.currentPlayer === 'X' ? 1 : 2;
-                document.querySelector('.message').textContent = `Player ${player}'s turn (${gameStates.ttt.currentPlayer})`;
-            }
-        }
+    streakEl.textContent = 'Streak: ' + (localStorage.getItem('harvona_streak')||0);
 
-        function checkTTTWinner() {
-            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-            return wins.some(combo => {
-                const [a,b,c] = combo;
-                return gameStates.ttt.board[a] && 
-                       gameStates.ttt.board[a] === gameStates.ttt.board[b] && 
-                       gameStates.ttt.board[a] === gameStates.ttt.board[c];
-            });
-        }
+    // helpers
+    function formatTime(s){
+      const m = Math.floor(s/60).toString().padStart(2,'0');
+      const ss = (s%60).toString().padStart(2,'0');
+      return `${m}:${ss}`;
+    }
+    function setProgress(){
+      const radius = 52;
+      const full = 2*Math.PI*radius;
+      const offset = full * (1 - (totalSeconds? (secondsLeft/totalSeconds) : 0));
+      progressCircle.style.strokeDashoffset = Math.max(0, offset);
+    }
 
-        function resetTicTacToe() {
-            gameStates.ttt = { board: Array(9).fill(''), currentPlayer: 'X', gameOver: false };
-            document.querySelector('.message').textContent = "Player 1's turn (X)";
-            renderTTTBoard();
-        }
+    /* ======= Timer Controls ======= */
+    function startFocus(minutes){
+      if(timerInterval) return;
+      focusMinutes = minutes||focusMinutes;
+      totalSeconds = focusMinutes*60;
+      secondsLeft = totalSeconds;
+      locked = true;
+      lockedBadge.style.display='inline-block';
+      startIcon.textContent='⏳';
+      enterFullscreen().catch(()=>{/*ignore*/});
+      pushLockHistory();
+      saveState();
+      tick(); // show initial
+      timerInterval = setInterval(tick, 1000);
+    }
 
-        function updateScore(player) {
-            const scoreElements = document.querySelectorAll('.score');
-            if(player === 1) {
-                scores.p1++;
-                scoreElements[0].textContent = scores.p1;
-            } else {
-                scores.p2++;
-                scoreElements[1].textContent = scores.p2;
-            }
-        }
+    function tick(){
+      secondsLeft--;
+      if(secondsLeft < 0){
+        finishFocus();
+        return;
+      }
+      timeLabel.textContent = formatTime(secondsLeft);
+      setProgress();
+    }
 
-        // Game 2: Color Match
-        function loadColorMatch() {
-            gameStates.color = { targetColor: '', colors: [], currentPlayer: 1 };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Player 1's turn</div>
-                    <div class="color-box" id="target-color">Match this color!</div>
-                    <div class="color-options" id="color-options"></div>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-            newColorRound();
-        }
+    function pauseFocus(){
+      // in our locked mode, pause should be disabled; show overlay instead
+      if(locked){
+        showOverlay();
+        return;
+      }
+      if(timerInterval){ clearInterval(timerInterval); timerInterval = null; startIcon.textContent='▶'; }
+    }
 
-        function newColorRound() {
-            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
-            const targetColor = colors[Math.floor(Math.random() * colors.length)];
-            const shuffled = [...colors].sort(() => Math.random() - 0.5).slice(0, 4);
-            
-            if(!shuffled.includes(targetColor)) {
-                shuffled[Math.floor(Math.random() * 4)] = targetColor;
-            }
-            
-            gameStates.color.targetColor = targetColor;
-            gameStates.color.colors = shuffled;
-            
-            document.getElementById('target-color').style.background = targetColor;
-            
-            const optionsDiv = document.getElementById('color-options');
-            optionsDiv.innerHTML = '';
-            
-            shuffled.forEach(color => {
-                const btn = document.createElement('button');
-                btn.className = 'color-btn';
-                btn.style.background = color;
-                btn.textContent = '?';
-                btn.onclick = () => checkColor(color);
-                optionsDiv.appendChild(btn);
-            });
-        }
+    function stopFocus(){
+      if(locked){
+        showOverlay();
+        return;
+      }
+      clearInterval(timerInterval); timerInterval=null;
+      secondsLeft = totalSeconds;
+      timeLabel.textContent = formatTime(secondsLeft);
+      progressCircle.style.strokeDashoffset = 2*Math.PI*52;
+      startIcon.textContent='▶';
+    }
 
-        function checkColor(selected) {
-            const player = gameStates.color.currentPlayer;
-            
-            if(selected === gameStates.color.targetColor) {
-                updateScore(player);
-                document.querySelector('.message').textContent = `Player ${player} got it! 🎉`;
-                setTimeout(() => {
-                    gameStates.color.currentPlayer = player === 1 ? 2 : 1;
-                    document.querySelector('.message').textContent = `Player ${gameStates.color.currentPlayer}'s turn`;
-                    newColorRound();
-                }, 1000);
-            } else {
-                document.querySelector('.message').textContent = `Wrong! Player ${player === 1 ? 2 : 1}'s turn`;
-                gameStates.color.currentPlayer = player === 1 ? 2 : 1;
-            }
-        }
+    function finishFocus(){
+      clearInterval(timerInterval); timerInterval = null;
+      locked = false;
+      lockedBadge.style.display='none';
+      startIcon.textContent='✔';
+      secondsLeft = 0;
+      timeLabel.textContent = '00:00';
+      setProgress();
+      incrementStreak();
+      showConfetti();
+      exitFullscreen().catch(()=>{/*ignore*/});
+      clearLockHistory();
+      saveState();
+      setTimeout(()=>{ startIcon.textContent='▶'; secondsLeft = totalSeconds; timeLabel.textContent = formatTime(secondsLeft); setProgress(); }, 1800);
+    }
 
-        // Game 3: Quick Draw
-        function loadQuickDraw() {
-            gameStates.draw = { currentPlayer: 1, grid: Array(16).fill(0) };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Click squares! Most colored wins!</div>
-                    <div class="draw-area" id="draw-area"></div>
-                    <button class="btn btn-small" onclick="endDrawRound()">End Round</button>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-            renderDrawGrid();
-        }
+    function incrementStreak(){
+      streak = (parseInt(localStorage.getItem('harvona_streak')||'0',10) || 0) + 1;
+      localStorage.setItem('harvona_streak', streak);
+      streakEl.textContent = 'Streak: ' + streak;
+    }
 
-        function renderDrawGrid() {
-            const grid = document.getElementById('draw-area');
-            grid.innerHTML = '';
-            
-            for(let i = 0; i < 16; i++) {
-                const square = document.createElement('div');
-                square.className = 'draw-square';
-                if(gameStates.draw.grid[i] === 1) square.classList.add('p1');
-                if(gameStates.draw.grid[i] === 2) square.classList.add('p2');
-                square.onclick = () => colorSquare(i);
-                grid.appendChild(square);
-            }
-        }
+    /* ======= Focus Lock UX tricks ======= */
+    function pushLockHistory(){
+      // push a history entry so the back button is trapped
+      history.pushState({locked: true}, '');
+      window.addEventListener('popstate', onPopState);
+      window.addEventListener('beforeunload', onBeforeUnload);
+    }
+    function clearLockHistory(){
+      // try to remove blocking events
+      try{ window.removeEventListener('popstate', onPopState); window.removeEventListener('beforeunload', onBeforeUnload); }catch(e){}
+    }
+    function onPopState(e){
+      // when back button pressed
+      if(locked){
+        showOverlay();
+        // push state back
+        history.pushState({locked:true}, '');
+      }
+    }
+    function onBeforeUnload(e){
+      if(locked){
+        const msg = 'Your focus session is active. Are you sure you want to leave?';
+        e.returnValue = msg;
+        return msg;
+      }
+    }
 
-        function colorSquare(index) {
-            if(gameStates.draw.grid[index] === 0) {
-                gameStates.draw.grid[index] = gameStates.draw.currentPlayer;
-                gameStates.draw.currentPlayer = gameStates.draw.currentPlayer === 1 ? 2 : 1;
-                renderDrawGrid();
-            }
-        }
+    function showOverlay(){ overlay.classList.add('show'); }
+    overlayClose.addEventListener('click', ()=> overlay.classList.remove('show'));
 
-        function endDrawRound() {
-            const p1Count = gameStates.draw.grid.filter(c => c === 1).length;
-            const p2Count = gameStates.draw.grid.filter(c => c === 2).length;
-            
-            if(p1Count > p2Count) {
-                updateScore(1);
-                document.querySelector('.message').textContent = 'Player 1 wins this round! 🎉';
-            } else if(p2Count > p1Count) {
-                updateScore(2);
-                document.querySelector('.message').textContent = 'Player 2 wins this round! 🎉';
-            } else {
-                document.querySelector('.message').textContent = "It's a tie! 🤝";
-            }
-            
-            setTimeout(() => {
-                gameStates.draw.grid = Array(16).fill(0);
-                gameStates.draw.currentPlayer = 1;
-                document.querySelector('.message').textContent = 'Click squares! Most colored wins!';
-                renderDrawGrid();
-            }, 2000);
-        }
+    /* ======= Fullscreen helpers ======= */
+    async function enterFullscreen(){
+      const el = document.documentElement;
+      if(el.requestFullscreen) await el.requestFullscreen();
+      else if(el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+    }
+    async function exitFullscreen(){
+      if(document.exitFullscreen) await document.exitFullscreen();
+      else if(document.webkitExitFullscreen) await document.webkitExitFullscreen();
+    }
 
-        // Game 4: Button Masher
-        function loadButtonMasher() {
-            gameStates.masher = { p1Clicks: 0, p2Clicks: 0, timeLeft: 10, active: false };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1" id="p1-clicks">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2" id="p2-clicks">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="timer" id="masher-timer">10</div>
-                    <button class="btn masher-btn player1" id="p1-masher" style="background: linear-gradient(135deg, #f5576c, #f093fb)">
-                        Player 1<br>TAP!
-                    </button>
-                    <button class="btn masher-btn player2" id="p2-masher" style="background: linear-gradient(135deg, #667eea, #764ba2)">
-                        Player 2<br>TAP!
-                    </button>
-                    <button class="btn" onclick="startMasher()">Start!</button>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-        }
-
-        function startMasher() {
-            gameStates.masher = { p1Clicks: 0, p2Clicks: 0, timeLeft: 10, active: true };
-            document.getElementById('p1-clicks').textContent = '0';
-            document.getElementById('p2-clicks').textContent = '0';
-            
-            document.getElementById('p1-masher').onclick = () => {
-                if(gameStates.masher.active) {
-                    gameStates.masher.p1Clicks++;
-                    document.getElementById('p1-clicks').textContent = gameStates.masher.p1Clicks;
-                }
-            };
-            
-            document.getElementById('p2-masher').onclick = () => {
-                if(gameStates.masher.active) {
-                    gameStates.masher.p2Clicks++;
-                    document.getElementById('p2-clicks').textContent = gameStates.masher.p2Clicks;
-                }
-            };
-            
-            const interval = setInterval(() => {
-                gameStates.masher.timeLeft--;
-                document.getElementById('masher-timer').textContent = gameStates.masher.timeLeft;
-                
-                if(gameStates.masher.timeLeft <= 0) {
-                    clearInterval(interval);
-                    gameStates.masher.active = false;
-                    
-                    if(gameStates.masher.p1Clicks > gameStates.masher.p2Clicks) {
-                        updateScore(1);
-                        alert('Player 1 wins! 🎉');
-                    } else if(gameStates.masher.p2Clicks > gameStates.masher.p1Clicks) {
-                        updateScore(2);
-                        alert('Player 2 wins! 🎉');
-                    } else {
-                        alert("It's a tie! 🤝");
-                    }
-                }
-            }, 1000);
-        }
-
-        // Game 5: Memory Match
-        function loadMemoryMatch() {
-            const emojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
-            const cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
-            
-            gameStates.memory = {
-                cards: cards,
-                flipped: [],
-                matched: [],
-                currentPlayer: 1,
-                canFlip: true
-            };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Player 1's turn</div>
-                    <div class="memory-grid" id="memory-grid"></div>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-            renderMemoryGrid();
-        }
-
-        function renderMemoryGrid() {
-            const grid = document.getElementById('memory-grid');
-            grid.innerHTML = '';
-            
-            gameStates.memory.cards.forEach((card, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'memory-card';
-                
-                if(gameStates.memory.flipped.includes(index) || gameStates.memory.matched.includes(index)) {
-                    btn.textContent = card;
-                    btn.classList.add('flipped');
-                } else {
-                    btn.textContent = '?';
-                }
-                
-                if(gameStates.memory.matched.includes(index)) {
-                    btn.classList.add('matched');
-                }
-                
-                btn.onclick = () => flipMemoryCard(index);
-                grid.appendChild(btn);
-            });
-        }
-
-        function flipMemoryCard(index) {
-            if(!gameStates.memory.canFlip || 
-               gameStates.memory.flipped.includes(index) || 
-               gameStates.memory.matched.includes(index) ||
-               gameStates.memory.flipped.length >= 2) return;
-            
-            gameStates.memory.flipped.push(index);
-            renderMemoryGrid();
-            
-            if(gameStates.memory.flipped.length === 2) {
-                gameStates.memory.canFlip = false;
-                const [first, second] = gameStates.memory.flipped;
-                
-                setTimeout(() => {
-                    if(gameStates.memory.cards[first] === gameStates.memory.cards[second]) {
-                        gameStates.memory.matched.push(first, second);
-                        updateScore(gameStates.memory.currentPlayer);
-                        
-                        if(gameStates.memory.matched.length === 16) {
-                            setTimeout(() => {
-                                alert('Game Over! Check scores!');
-                                loadMemoryMatch();
-                            }, 500);
-                        }
-                    } else {
-                        gameStates.memory.currentPlayer = gameStates.memory.currentPlayer === 1 ? 2 : 1;
-                        document.querySelector('.message').textContent = `Player ${gameStates.memory.currentPlayer}'s turn`;
-                    }
-                    
-                    gameStates.memory.flipped = [];
-                    gameStates.memory.canFlip = true;
-                    renderMemoryGrid();
-                }, 1000);
-            }
-        }
-
-        // Game 6: Rock Paper Scissors
-        function loadRockPaperScissors() {
-            gameStates.rps = { p1Choice: null, p2Choice: null };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Player 1: Choose your move!</div>
-                    <div class="rps-options">
-                        <button class="rps-btn" onclick="makeRPSChoice('✊')">✊</button>
-                        <button class="rps-btn" onclick="makeRPSChoice('✋')">✋</button>
-                        <button class="rps-btn" onclick="makeRPSChoice('✌️')">✌️</button>
-                    </div>
-                    <div class="rps-result" id="rps-result"></div>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-        }
-
-        function makeRPSChoice(choice) {
-            if(!gameStates.rps.p1Choice) {
-                gameStates.rps.p1Choice = choice;
-                document.querySelector('.message').textContent = 'Player 2: Choose your move!';
-            } else if(!gameStates.rps.p2Choice) {
-                gameStates.rps.p2Choice = choice;
-                determineRPSWinner();
-            }
-        }
-
-        function determineRPSWinner() {
-            const p1 = gameStates.rps.p1Choice;
-            const p2 = gameStates.rps.p2Choice;
-            
-            const result = document.getElementById('rps-result');
-            result.innerHTML = `<div>Player 1: ${p1} vs Player 2: ${p2}</div>`;
-            
-            let winner = '';
-            if(p1 === p2) {
-                winner = "It's a tie! 🤝";
-            } else if(
-                (p1 === '✊' && p2 === '✌️') ||
-                (p1 === '✋' && p2 === '✊') ||
-                (p1 === '✌️' && p2 === '✋')
-            ) {
-                winner = 'Player 1 wins! 🎉';
-                updateScore(1);
-            } else {
-                winner = 'Player 2 wins! 🎉';
-                updateScore(2);
-            }
-            
-            result.innerHTML += `<div>${winner}</div>`;
-            
-            setTimeout(() => {
-                gameStates.rps = { p1Choice: null, p2Choice: null };
-                document.querySelector('.message').textContent = 'Player 1: Choose your move!';
-                result.innerHTML = '';
-            }, 2000);
-        }
-
-        // Game 7: Reaction Battle
-        function loadReactionBattle() {
-            gameStates.reaction = { waiting: false, startTime: 0, player: 1 };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message" id="reaction-msg">Click Start when ready!</div>
-                    <div id="reaction-area" style="background: #ff4444; height: 200px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; font-weight: bold; cursor: pointer;">
-                        Wait for GREEN!
-                    </div>
-                    <button class="btn" onclick="startReaction()">Start Test</button>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-        }
-
-        function startReaction() {
-            const area = document.getElementById('reaction-area');
-            const msg = document.getElementById('reaction-msg');
-            
-            area.style.background = '#ff4444';
-            area.textContent = 'Wait...';
-            msg.textContent = `Player ${gameStates.reaction.player}'s turn`;
-            
-            const delay = 2000 + Math.random() * 3000;
-            
-            setTimeout(() => {
-                area.style.background = '#44ff44';
-                area.textContent = 'TAP NOW!';
-                gameStates.reaction.waiting = true;
-                gameStates.reaction.startTime = Date.now();
-                
-                area.onclick = () => {
-                    if(gameStates.reaction.waiting) {
-                        const reactionTime = Date.now() - gameStates.reaction.startTime;
-                        msg.textContent = `Player ${gameStates.reaction.player}: ${reactionTime}ms!`;
-                        
-                        if(reactionTime < 300) {
-                            updateScore(gameStates.reaction.player);
-                            area.textContent = `🎉 ${reactionTime}ms - Amazing!`;
-                        } else {
-                            area.textContent = `${reactionTime}ms`;
-                        }
-                        
-                        gameStates.reaction.waiting = false;
-                        gameStates.reaction.player = gameStates.reaction.player === 1 ? 2 : 1;
-                        area.onclick = null;
-                    }
-                };
-            }, delay);
-        }
-
-        // Game 8: Number Guesser
-        function loadNumberGuesser() {
-            gameStates.number = { target: Math.floor(Math.random() * 100) + 1, player: 1, attempts: 0 };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Player 1: Guess a number (1-100)</div>
-                    <input type="number" id="guess-input" placeholder="Enter your guess" min="1" max="100">
-                    <div id="guess-feedback" style="text-align: center; font-size: 18px; margin: 15px 0; min-height: 30px; font-weight: bold;"></div>
-                    <button class="btn" onclick="makeGuess()">Submit Guess</button>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-        }
-
-        function makeGuess() {
-            const guess = parseInt(document.getElementById('guess-input').value);
-            const feedback = document.getElementById('guess-feedback');
-            
-            if(!guess || guess < 1 || guess > 100) {
-                feedback.textContent = 'Enter a valid number (1-100)!';
-                return;
-            }
-            
-            gameStates.number.attempts++;
-            
-            if(guess === gameStates.number.target) {
-                feedback.textContent = `🎉 Correct! Player ${gameStates.number.player} wins!`;
-                updateScore(gameStates.number.player);
-                setTimeout(() => {
-                    gameStates.number = { target: Math.floor(Math.random() * 100) + 1, player: 1, attempts: 0 };
-                    feedback.textContent = '';
-                    document.getElementById('guess-input').value = '';
-                    document.querySelector('.message').textContent = 'Player 1: Guess a number (1-100)';
-                }, 2000);
-            } else {
-                const hint = guess < gameStates.number.target ? 'Too low! ⬆️' : 'Too high! ⬇️';
-                feedback.textContent = hint;
-                gameStates.number.player = gameStates.number.player === 1 ? 2 : 1;
-                document.querySelector('.message').textContent = `Player ${gameStates.number.player}'s turn`;
-                document.getElementById('guess-input').value = '';
-            }
-        }
-
-        // Game 9: Tap War
-        function loadTapWar() {
-            gameStates.tapwar = { p1: 0, p2: 0, active: false };
-            
-            const html = `
-                <div class="game-area">
-                    <div class="message">Tap your button as fast as you can!</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="p1-progress" style="width: 50%"></div>
-                    </div>
-                    <button class="btn tap-btn player1" id="tap1" style="background: linear-gradient(135deg, #f5576c, #f093fb)">
-                        Player 1 TAP!<br><span id="p1-taps">0</span>
-                    </button>
-                    <button class="btn tap-btn player2" id="tap2" style="background: linear-gradient(135deg, #667eea, #764ba2)">
-                        Player 2 TAP!<br><span id="p2-taps">0</span>
-                    </button>
-                    <button class="btn" onclick="startTapWar()">Start 10s Battle!</button>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-        }
-
-        function startTapWar() {
-            gameStates.tapwar = { p1: 0, p2: 0, active: true, timeLeft: 10 };
-            document.getElementById('p1-taps').textContent = '0';
-            document.getElementById('p2-taps').textContent = '0';
-            
-            document.getElementById('tap1').onclick = () => {
-                if(gameStates.tapwar.active) {
-                    gameStates.tapwar.p1++;
-                    document.getElementById('p1-taps').textContent = gameStates.tapwar.p1;
-                    updateTapProgress();
-                }
-            };
-            
-            document.getElementById('tap2').onclick = () => {
-                if(gameStates.tapwar.active) {
-                    gameStates.tapwar.p2++;
-                    document.getElementById('p2-taps').textContent = gameStates.tapwar.p2;
-                    updateTapProgress();
-                }
-            };
-            
-            const interval = setInterval(() => {
-                gameStates.tapwar.timeLeft--;
-                document.querySelector('.message').textContent = `${gameStates.tapwar.timeLeft}s left!`;
-                
-                if(gameStates.tapwar.timeLeft <= 0) {
-                    clearInterval(interval);
-                    gameStates.tapwar.active = false;
-                    
-                    if(gameStates.tapwar.p1 > gameStates.tapwar.p2) {
-                        alert(`Player 1 wins! ${gameStates.tapwar.p1} vs ${gameStates.tapwar.p2}`);
-                        updateScore(1);
-                    } else if(gameStates.tapwar.p2 > gameStates.tapwar.p1) {
-                        alert(`Player 2 wins! ${gameStates.tapwar.p2} vs ${gameStates.tapwar.p1}`);
-                        updateScore(2);
-                    } else {
-                        alert("It's a tie!");
-                    }
-                }
-            }, 1000);
-        }
-
-        function updateTapProgress() {
-            const total = gameStates.tapwar.p1 + gameStates.tapwar.p2;
-            const p1Percent = total > 0 ? (gameStates.tapwar.p1 / total) * 100 : 50;
-            document.getElementById('p1-progress').style.width = p1Percent + '%';
-        }
-
-        // Game 10: Color Clicker
-        function loadColorClicker() {
-            gameStates.colorclick = { targetColor: '', colors: [], player: 1, rounds: 5 };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Click the <span id="color-name" style="font-weight: bold;"></span> button!</div>
-                    <div class="color-options" id="clicker-options"></div>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-            newColorClickRound();
-        }
-
-        function newColorClickRound() {
-            const colorNames = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
-            const colorValues = ['#ff4444', '#4444ff', '#44ff44', '#ffff44'];
-            
-            const targetIdx = Math.floor(Math.random() * 4);
-            gameStates.colorclick.targetColor = colorValues[targetIdx];
-            
-            document.getElementById('color-name').textContent = colorNames[targetIdx];
-            document.getElementById('color-name').style.color = colorValues[targetIdx];
-            
-            const shuffled = [...colorValues].sort(() => Math.random() - 0.5);
-            const options = document.getElementById('clicker-options');
-            options.innerHTML = '';
-            
-            shuffled.forEach(color => {
-                const btn = document.createElement('button');
-                btn.className = 'color-btn';
-                btn.style.background = color;
-                btn.textContent = ' ';
-                btn.onclick = () => checkColorClick(color);
-                options.appendChild(btn);
-            });
-        }
-
-        function checkColorClick(selected) {
-            if(selected === gameStates.colorclick.targetColor) {
-                updateScore(gameStates.colorclick.player);
-            }
-            
-            gameStates.colorclick.player = gameStates.colorclick.player === 1 ? 2 : 1;
-            newColorClickRound();
-        }
-
-        // Game 11: Word Race
-        function loadWordRace() {
-            const words = ['GAME', 'CODE', 'PLAY', 'FAST', 'RACE', 'TYPE', 'WORD', 'COOL', 'JUMP', 'FIRE'];
-            gameStates.wordrace = { 
-                targetWord: words[Math.floor(Math.random() * words.length)], 
-                player: 1,
-                words: words
-            };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Player 1: Type this word!</div>
-                    <div class="target-display">${gameStates.wordrace.targetWord}</div>
-                    <input type="text" id="word-input" placeholder="Type the word here" style="text-transform: uppercase;">
-                    <button class="btn" onclick="checkWord()">Submit</button>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-            
-            document.getElementById('word-input').addEventListener('keyup', (e) => {
-                if(e.key === 'Enter') checkWord();
-            });
-        }
-
-        function checkWord() {
-            const input = document.getElementById('word-input').value.toUpperCase();
-            
-            if(input === gameStates.wordrace.targetWord) {
-                updateScore(gameStates.wordrace.player);
-                alert(`Player ${gameStates.wordrace.player} got it! 🎉`);
-                
-                gameStates.wordrace.targetWord = gameStates.wordrace.words[Math.floor(Math.random() * gameStates.wordrace.words.length)];
-                gameStates.wordrace.player = gameStates.wordrace.player === 1 ? 2 : 1;
-                
-                document.querySelector('.target-display').textContent = gameStates.wordrace.targetWord;
-                document.querySelector('.message').textContent = `Player ${gameStates.wordrace.player}: Type this word!`;
-                document.getElementById('word-input').value = '';
-            } else {
-                alert('Wrong! Try again or pass to other player!');
-                gameStates.wordrace.player = gameStates.wordrace.player === 1 ? 2 : 1;
-                document.querySelector('.message').textContent = `Player ${gameStates.wordrace.player}: Type this word!`;
-                document.getElementById('word-input').value = '';
-            }
-        }
-
-        // Game 12: Math Duel
-        function loadMathDuel() {
-            gameStates.math = { player: 1 };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Player 1's turn</div>
-                    <div id="math-problem" style="font-size: 36px; text-align: center; margin: 20px 0; font-weight: bold;"></div>
-                    <input type="number" id="math-input" placeholder="Your answer">
-                    <button class="btn" onclick="checkMath()">Submit Answer</button>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-            newMathProblem();
-            
-            document.getElementById('math-input').addEventListener('keyup', (e) => {
-                if(e.key === 'Enter') checkMath();
-            });
-        }
-
-        function newMathProblem() {
-            const num1 = Math.floor(Math.random() * 20) + 1;
-            const num2 = Math.floor(Math.random() * 20) + 1;
-            const operations = ['+', '-', '×'];
-            const op = operations[Math.floor(Math.random() * operations.length)];
-            
-            let answer;
-            if(op === '+') answer = num1 + num2;
-            else if(op === '-') answer = num1 - num2;
-            else answer = num1 * num2;
-            
-            gameStates.math.problem = `${num1} ${op} ${num2}`;
-            gameStates.math.answer = answer;
-            
-            document.getElementById('math-problem').textContent = gameStates.math.problem + ' = ?';
-        }
-
-        function checkMath() {
-            const input = parseInt(document.getElementById('math-input').value);
-            
-            if(input === gameStates.math.answer) {
-                updateScore(gameStates.math.player);
-                alert(`Player ${gameStates.math.player} correct! 🎉`);
-                gameStates.math.player = gameStates.math.player === 1 ? 2 : 1;
-            } else {
-                alert(`Wrong! Answer was ${gameStates.math.answer}`);
-                gameStates.math.player = gameStates.math.player === 1 ? 2 : 1;
-            }
-            
-            document.querySelector('.message').textContent = `Player ${gameStates.math.player}'s turn`;
-            document.getElementById('math-input').value = '';
-            newMathProblem();
-        }
-
-        // Game 13: Pattern Memory
-        function loadPatternMemory() {
-            gameStates.pattern = { sequence: [], playerSequence: [], player: 1, showing: false };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Player 1: Watch the pattern!</div>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0;">
-                        <button class="btn" style="height: 100px; background: #ff4444;" onclick="patternClick(0)"></button>
-                        <button class="btn" style="height: 100px; background: #44ff44;" onclick="patternClick(1)"></button>
-                        <button class="btn" style="height: 100px; background: #4444ff;" onclick="patternClick(2)"></button>
-                        <button class="btn" style="height: 100px; background: #ffff44;" onclick="patternClick(3)"></button>
-                    </div>
-                    <button class="btn" onclick="startPattern()">Start Pattern</button>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-        }
-
-        function startPattern() {
-            gameStates.pattern.sequence.push(Math.floor(Math.random() * 4));
-            gameStates.pattern.playerSequence = [];
-            gameStates.pattern.showing = true;
-            
-            showPattern(0);
-        }
-
-        function showPattern(index) {
-            if(index >= gameStates.pattern.sequence.length) {
-                gameStates.pattern.showing = false;
-                document.querySelector('.message').textContent = `Player ${gameStates.pattern.player}: Repeat the pattern!`;
-                return;
-            }
-            
-            const buttons = document.querySelectorAll('.game-area .btn');
-            const btnIndex = gameStates.pattern.sequence[index];
-            
-            buttons[btnIndex].style.opacity = '0.5';
-            setTimeout(() => {
-                buttons[btnIndex].style.opacity = '1';
-                setTimeout(() => showPattern(index + 1), 300);
-            }, 500);
-        }
-
-        function patternClick(index) {
-            if(gameStates.pattern.showing) return;
-            
-            gameStates.pattern.playerSequence.push(index);
-            
-            const currentIndex = gameStates.pattern.playerSequence.length - 1;
-            
-            if(gameStates.pattern.playerSequence[currentIndex] !== gameStates.pattern.sequence[currentIndex]) {
-                alert(`Wrong! Player ${gameStates.pattern.player === 1 ? 2 : 1} wins!`);
-                updateScore(gameStates.pattern.player === 1 ? 2 : 1);
-                gameStates.pattern = { sequence: [], playerSequence: [], player: gameStates.pattern.player === 1 ? 2 : 1, showing: false };
-                document.querySelector('.message').textContent = `Player ${gameStates.pattern.player}: Watch the pattern!`;
-            } else if(gameStates.pattern.playerSequence.length === gameStates.pattern.sequence.length) {
-                updateScore(gameStates.pattern.player);
-                setTimeout(() => startPattern(), 500);
-            }
-        }
-
-        // Game 14: Speed Tap
-        function loadSpeedTap() {
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">First to tap 50 times wins!</div>
-                    <button class="btn tap-btn player1" id="speed1" style="background: linear-gradient(135deg, #f5576c, #f093fb)">
-                        Player 1<br><span id="speed1-count">0</span>/50
-                    </button>
-                    <button class="btn tap-btn player2" id="speed2" style="background: linear-gradient(135deg, #667eea, #764ba2)">
-                        Player 2<br><span id="speed2-count">0</span>/50
-                    </button>
-                    <button class="btn" onclick="startSpeedTap()">Start Race!</button>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-        }
-
-        function startSpeedTap() {
-            let p1Count = 0, p2Count = 0;
-            
-            document.getElementById('speed1-count').textContent = '0';
-            document.getElementById('speed2-count').textContent = '0';
-            
-            document.getElementById('speed1').onclick = () => {
-                p1Count++;
-                document.getElementById('speed1-count').textContent = p1Count;
-                if(p1Count >= 50) {
-                    alert('Player 1 wins! 🎉');
-                    updateScore(1);
-                    document.getElementById('speed1').onclick = null;
-                    document.getElementById('speed2').onclick = null;
-                }
-            };
-            
-            document.getElementById('speed2').onclick = () => {
-                p2Count++;
-                document.getElementById('speed2-count').textContent = p2Count;
-                if(p2Count >= 50) {
-                    alert('Player 2 wins! 🎉');
-                    updateScore(2);
-                    document.getElementById('speed1').onclick = null;
-                    document.getElementById('speed2').onclick = null;
-                }
-            };
-        }
-
-        // Game 15: Circle Catch
-        function loadCircleCatch() {
-            gameStates.circle = { player: 1, caught: { p1: 0, p2: 0 } };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Player 1: Tap the circles! (10 each)</div>
-                    <div id="circle-area" style="position: relative; height: 300px; background: #f0f0f0; border-radius: 10px; overflow: hidden;"></div>
-                    <div style="text-align: center; margin-top: 10px;">
-                        <span class="player1" style="font-weight: bold; margin-right: 20px;">P1: <span id="p1-caught">0</span></span>
-                        <span class="player2" style="font-weight: bold;">P2: <span id="p2-caught">0</span></span>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-            startCircleGame();
-        }
-
-        function startCircleGame() {
-            const area = document.getElementById('circle-area');
-            
-            const interval = setInterval(() => {
-                if(gameStates.circle.caught.p1 >= 10 && gameStates.circle.caught.p2 >= 10) {
-                    clearInterval(interval);
-                    const winner = gameStates.circle.caught.p1 > gameStates.circle.caught.p2 ? 1 : 2;
-                    updateScore(winner);
-                    alert(`Player ${winner} wins!`);
-                    return;
-                }
-                
-                const circle = document.createElement('div');
-                const size = 40 + Math.random() * 30;
-                const player = gameStates.circle.player;
-                
-                circle.style.cssText = `
-                    position: absolute;
-                    width: ${size}px;
-                    height: ${size}px;
-                    border-radius: 50%;
-                    background: ${player === 1 ? '#f5576c' : '#667eea'};
-                    left: ${Math.random() * (area.offsetWidth - size)}px;
-                    top: ${Math.random() * (area.offsetHeight - size)}px;
-                    cursor: pointer;
-                    transition: transform 0.2s;
-                `;
-                
-                circle.onclick = () => {
-                    if(player === 1 && gameStates.circle.caught.p1 < 10) {
-                        gameStates.circle.caught.p1++;
-                        document.getElementById('p1-caught').textContent = gameStates.circle.caught.p1;
-                    } else if(player === 2 && gameStates.circle.caught.p2 < 10) {
-                        gameStates.circle.caught.p2++;
-                        document.getElementById('p2-caught').textContent = gameStates.circle.caught.p2;
-                    }
-                    circle.remove();
-                };
-                
-                area.appendChild(circle);
-                
-                setTimeout(() => circle.remove(), 1500);
-                
-                gameStates.circle.player = gameStates.circle.player === 1 ? 2 : 1;
-            }, 800);
-        }
-
-        // Game 16: Emoji Match
-        function loadEmojiMatch() {
-            gameStates.emoji = { target: '', player: 1 };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Player 1: Find the matching emoji!</div>
-                    <div class="target-display" id="emoji-target">🎯</div>
-                    <div class="emoji-grid" id="emoji-grid"></div>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-            newEmojiRound();
-        }
-
-        function newEmojiRound() {
-            const emojis = ['😀', '😎', '🎮', '🎯', '⚡', '🔥', '💎', '🌟', '🎨', '🎪', '🎭', '🎬'];
-            const target = emojis[Math.floor(Math.random() * emojis.length)];
-            const grid = [...emojis].sort(() => Math.random() - 0.5).slice(0, 12);
-            
-            if(!grid.includes(target)) {
-                grid[Math.floor(Math.random() * 12)] = target;
-            }
-            
-            gameStates.emoji.target = target;
-            document.getElementById('emoji-target').textContent = target;
-            
-            const gridEl = document.getElementById('emoji-grid');
-            gridEl.innerHTML = '';
-            
-            grid.forEach(emoji => {
-                const btn = document.createElement('button');
-                btn.className = 'emoji-btn';
-                btn.textContent = emoji;
-                btn.onclick = () => checkEmoji(emoji);
-                gridEl.appendChild(btn);
-            });
-        }
-
-        function checkEmoji(emoji) {
-            if(emoji === gameStates.emoji.target) {
-                updateScore(gameStates.emoji.player);
-                gameStates.emoji.player = gameStates.emoji.player === 1 ? 2 : 1;
-                document.querySelector('.message').textContent = `Player ${gameStates.emoji.player}: Find the matching emoji!`;
-                newEmojiRound();
-            }
-        }
-
-        // Game 17: Fast Fingers
-        function loadFastFingers() {
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Type the letters as they appear!</div>
-                    <div class="target-display" id="letter-target">A</div>
-                    <input type="text" id="letter-input" maxlength="1" style="text-align: center; font-size: 36px; text-transform: uppercase;">
-                    <div style="text-align: center; margin-top: 15px;">
-                        <span class="player1" style="font-weight: bold; margin-right: 20px;">P1: <span id="p1-letters">0</span></span>
-                        <span class="player2" style="font-weight: bold;">P2: <span id="p2-letters">0</span></span>
-                    </div>
-                    <button class="btn" onclick="startFastFingers()">Start!</button>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-        }
-
-        function startFastFingers() {
-            let p1Score = 0, p2Score = 0, currentPlayer = 1, rounds = 0;
-            
-            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            
-            function newLetter() {
-                if(rounds >= 20) {
-                    const winner = p1Score > p2Score ? 1 : (p2Score > p1Score ? 2 : 0);
-                    if(winner > 0) {
-                        updateScore(winner);
-                        alert(`Player ${winner} wins!`);
-                    } else {
-                        alert("It's a tie!");
-                    }
-                    return;
-                }
-                
-                const letter = letters[Math.floor(Math.random() * letters.length)];
-                document.getElementById('letter-target').textContent = letter;
-                document.getElementById('letter-input').value = '';
-                document.querySelector('.message').textContent = `Player ${currentPlayer}'s turn!`;
-                
-                const input = document.getElementById('letter-input');
-                input.focus();
-                
-                input.onkeyup = (e) => {
-                    if(e.target.value.toUpperCase() === letter) {
-                        if(currentPlayer === 1) {
-                            p1Score++;
-                            document.getElementById('p1-letters').textContent = p1Score;
-                        } else {
-                            p2Score++;
-                            document.getElementById('p2-letters').textContent = p2Score;
-                        }
-                        currentPlayer = currentPlayer === 1 ? 2 : 1;
-                        rounds++;
-                        setTimeout(newLetter, 300);
-                    }
-                };
-            }
-            
-            newLetter();
-        }
-
-        // Game 18: Last Click Wins
-        function loadLastClick() {
-            gameStates.lastclick = { number: 21, player: 1 };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Player 1: Choose 1, 2, or 3</div>
-                    <div class="timer" id="countdown-number">21</div>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                        <button class="btn" onclick="lastClickMove(1)">-1</button>
-                        <button class="btn" onclick="lastClickMove(2)">-2</button>
-                        <button class="btn" onclick="lastClickMove(3)">-3</button>
-                    </div>
-                    <p style="text-align: center; margin-top: 15px; color: #666;">Get it to exactly 0 to win!</p>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-        }
-
-        function lastClickMove(subtract) {
-            gameStates.lastclick.number -= subtract;
-            document.getElementById('countdown-number').textContent = gameStates.lastclick.number;
-            
-            if(gameStates.lastclick.number === 0) {
-                updateScore(gameStates.lastclick.player);
-                alert(`Player ${gameStates.lastclick.player} wins! 🎉`);
-                gameStates.lastclick = { number: 21, player: 1 };
-                document.getElementById('countdown-number').textContent = '21';
-                document.querySelector('.message').textContent = 'Player 1: Choose 1, 2, or 3';
-            } else if(gameStates.lastclick.number < 0) {
-                const winner = gameStates.lastclick.player === 1 ? 2 : 1;
-                updateScore(winner);
-                alert(`Player ${gameStates.lastclick.player} went too far! Player ${winner} wins!`);
-                gameStates.lastclick = { number: 21, player: 1 };
-                document.getElementById('countdown-number').textContent = '21';
-                document.querySelector('.message').textContent = 'Player 1: Choose 1, 2, or 3';
-            } else {
-                gameStates.lastclick.player = gameStates.lastclick.player === 1 ? 2 : 1;
-                document.querySelector('.message').textContent = `Player ${gameStates.lastclick.player}: Choose 1, 2, or 3`;
-            }
-        }
-
-        // Game 19: Dice Duel
-        function loadDiceDuel() {
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Roll the dice! Higher number wins!</div>
-                    <div style="display: flex; justify-content: space-around; margin: 30px 0;">
-                        <div style="text-align: center;">
-                            <div class="player1" style="font-size: 60px;">🎲</div>
-                            <div id="p1-dice" style="font-size: 36px; font-weight: bold;">?</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div class="player2" style="font-size: 60px;">🎲</div>
-                            <div id="p2-dice" style="font-size: 36px; font-weight: bold;">?</div>
-                        </div>
-                    </div>
-                    <button class="btn" onclick="rollDice()">Roll Dice!</button>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-        }
-
-        function rollDice() {
-            const p1Roll = Math.floor(Math.random() * 6) + 1;
-            const p2Roll = Math.floor(Math.random() * 6) + 1;
-            
-            // Animate
-            let count = 0;
-            const interval = setInterval(() => {
-                document.getElementById('p1-dice').textContent = Math.floor(Math.random() * 6) + 1;
-                document.getElementById('p2-dice').textContent = Math.floor(Math.random() * 6) + 1;
-                count++;
-                
-                if(count >= 10) {
-                    clearInterval(interval);
-                    document.getElementById('p1-dice').textContent = p1Roll;
-                    document.getElementById('p2-dice').textContent = p2Roll;
-                    
-                    if(p1Roll > p2Roll) {
-                        updateScore(1);
-                        document.querySelector('.message').textContent = 'Player 1 wins this round! 🎉';
-                    } else if(p2Roll > p1Roll) {
-                        updateScore(2);
-                        document.querySelector('.message').textContent = 'Player 2 wins this round! 🎉';
-                    } else {
-                        document.querySelector('.message').textContent = "It's a tie! Roll again! 🤝";
-                    }
-                }
-            }, 100);
-        }
-
-        // Game 20: Simon Says
-        function loadSimonSays() {
-            gameStates.simon = { commands: [], currentRound: 0, player: 1 };
-            
-            const html = `
-                <div class="score-board">
-                    <div class="player-score">
-                        <h3>Player 1</h3>
-                        <div class="score player1">0</div>
-                    </div>
-                    <div class="player-score">
-                        <h3>Player 2</h3>
-                        <div class="score player2">0</div>
-                    </div>
-                </div>
-                <div class="game-area">
-                    <div class="message">Player 1: Follow Simon's commands!</div>
-                    <div id="simon-command" style="font-size: 24px; text-align: center; min-height: 80px; display: flex; align-items: center; justify-content: center; background: #f0f0f0; border-radius: 10px; margin: 20px 0; padding: 20px; font-weight: bold;"></div>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                        <button class="btn" onclick="simonAnswer(true)">✅ DO IT!</button>
-                        <button class="btn" onclick="simonAnswer(false)">❌ DON'T DO IT!</button>
-                    </div>
-                    <button class="btn" style="margin-top: 15px;" onclick="startSimon()">Start Game</button>
-                </div>
-            `;
-            
-            document.getElementById('game-container').innerHTML = html;
-        }
-
-        function startSimon() {
-            const actions = ['Jump!', 'Clap!', 'Wave!', 'Dance!', 'Spin!', 'Smile!', 'Wink!', 'Nod!'];
-            const shouldDo = Math.random() > 0.5;
-            const action = actions[Math.floor(Math.random() * actions.length)];
-            
-            const command = shouldDo ? `Simon says: ${action}` : action;
-            gameStates.simon.currentCommand = { text: command, shouldDo: shouldDo };
-            
-            document.getElementById('simon-command').textContent = command;
-            document.querySelector('.message').textContent = `Player ${gameStates.simon.player}: Should you do it?`;
-        }
-
-        function simonAnswer(doIt) {
-            const correct = doIt === gameStates.simon.currentCommand.shouldDo;
-            
-            if(correct) {
-                updateScore(gameStates.simon.player);
-                alert(`Player ${gameStates.simon.player} correct! 🎉`);
-            } else {
-                alert(`Player ${gameStates.simon.player} wrong! ❌`);
-            }
-            
-            gameStates.simon.player = gameStates.simon.player === 1 ? 2 : 1;
-            startSimon();
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            showMenu();
+    /* ======= Confetti (simple) ======= */
+    function showConfetti(){
+      const container = document.getElementById('confetti');
+      for(let i=0;i<70;i++){
+        const el = document.createElement('div');
+        el.style.position='absolute'; el.style.width='8px'; el.style.height='10px';
+        el.style.left = (Math.random()*100)+'%';
+        el.style.top = '-10%';
+        el.style.opacity = Math.random()*0.9+0.2;
+        el.style.transform = 'rotate('+ (Math.random()*360) +'deg)';
+        el.style.background = ['#FFB86B','#6AA6FF','#79BFA3','#F7A58C'][Math.floor(Math.random()*4)];
+        el.style.borderRadius = '2px';
+        el.style.transition = 'transform 1.8s linear, top 1.8s linear';
+        container.appendChild(el);
+        requestAnimationFrame(()=> {
+          el.style.top = (80 + Math.random()*20) + '%';
+          el.style.transform = 'translateY(200px) rotate('+ (Math.random()*720) +'deg)';
         });
-    </script>
+        setTimeout(()=> el.remove(), 2000);
+      }
+    }
+
+    /* ======= Tasks & Alarms ======= */
+    const taskListEl = document.getElementById('taskList');
+    const subjInput = document.getElementById('taskSubj');
+    const timeInput = document.getElementById('taskTime');
+    const addTaskBtn = document.getElementById('addTask');
+
+    function loadTasks(){
+      const tasks = JSON.parse(localStorage.getItem('harvona_tasks')||'[]');
+      return tasks;
+    }
+    function saveTasks(tasks){
+      localStorage.setItem('harvona_tasks', JSON.stringify(tasks));
+    }
+    function renderTasks(){
+      const tasks = loadTasks();
+      taskListEl.innerHTML = '';
+      tasks.forEach((t, idx) => {
+        const row = document.createElement('div');
+        row.className='task-row';
+        const icon = document.createElement('div');
+        icon.innerHTML = getEmojiForSubject(t.subject);
+        icon.style.fontSize='20px';
+        const subj = document.createElement('div'); subj.className='task-subject'; subj.textContent = t.subject;
+        const time = document.createElement('div'); time.className='task-time'; time.textContent = t.time;
+        const del = document.createElement('button'); del.textContent='✕'; del.style.marginLeft='8px'; del.style.border='none'; del.style.background='transparent'; del.style.cursor='pointer';
+        del.addEventListener('click', ()=>{
+          tasks.splice(idx,1); saveTasks(tasks); renderTasks();
+        });
+        row.appendChild(icon); row.appendChild(subj); row.appendChild(time); row.appendChild(del);
+        taskListEl.appendChild(row);
+      });
+    }
+    function getEmojiForSubject(s){
+      const lower = (s||'').toLowerCase();
+      if(lower.includes('math')) return '🧮';
+      if(lower.includes('read')||lower.includes('book')) return '📚';
+      if(lower.includes('science')||lower.includes('chem')) return '🧪';
+      if(lower.includes('code')||lower.includes('program')) return '💻';
+      return '📘';
+    }
+
+    addTaskBtn.addEventListener('click', ()=>{
+      const subj = subjInput.value.trim(); const time = timeInput.value;
+      if(!subj || !time) return alert('Add a subject and time');
+      const tasks = loadTasks();
+      tasks.push({subject:subj, time:time});
+      saveTasks(tasks); renderTasks();
+      // animation bounce on new addition:
+      const last = taskListEl.lastChild;
+      if(last){ last.classList.add('bounce'); setTimeout(()=>last.classList.remove('bounce'),600); }
+      subjInput.value=''; timeInput.value='';
+    });
+
+    // check alarms every 10s
+    setInterval(()=>{
+      const tasks = loadTasks();
+      const now = new Date();
+      const cur = now.toTimeString().slice(0,5);
+      for(const t of tasks){
+        if(t.time === cur){
+          // trigger alarm if not already triggered in this minute
+          const key = `alarm_${t.subject}_${t.time}_${now.toDateString()}`;
+          if(!localStorage.getItem(key)){
+            localStorage.setItem(key, '1');
+            triggerAlarm(t);
+          }
+        }
+      }
+    }, 10000);
+
+    function triggerAlarm(task){
+      // Show fullscreen alarm screen and start looping chime
+      document.getElementById('alarmTitle').textContent = `${task.subject} — It's time!`;
+      alarmScreen.classList.add('show');
+
+      // try to play chime; requires prior user interaction in most browsers
+      try{ chime.currentTime = 0; chime.play().catch(()=>{/* autoplay blocked; user must interact to hear */}); }catch(e){}
+      // keep playing until user clicks "I'm Ready!"
+    }
+    alarmStopBtn.addEventListener('click', ()=>{
+      alarmScreen.classList.remove('show');
+      try{ chime.pause(); chime.currentTime=0; }catch(e){}
+    });
+
+    /* ======= Persist & restore timer state (simple) ======= */
+    function saveState(){
+      const state = {locked, focusMinutes, totalSeconds, secondsLeft};
+      localStorage.setItem('harvona_state', JSON.stringify(state));
+    }
+    function restoreState(){
+      try{
+        const s = JSON.parse(localStorage.getItem('harvona_state')||'null');
+        if(s){
+          locked = s.locked; focusMinutes = s.focusMinutes; totalSeconds = s.totalSeconds; secondsLeft = s.secondsLeft;
+          timeLabel.textContent = formatTime(secondsLeft || totalSeconds);
+          setProgress();
+          if(locked){
+            lockedBadge.style.display='inline-block';
+            pushLockHistory();
+            // resume ticking
+            timerInterval = setInterval(()=>{
+              secondsLeft--;
+              if(secondsLeft<0){ finishFocus(); }
+              else { timeLabel.textContent=formatTime(secondsLeft); setProgress(); }
+            },1000);
+          }
+        }
+      }catch(e){}
+    }
+
+    /* ======= UI bindings ======= */
+    document.querySelectorAll('.preset').forEach(el=>{
+      el.addEventListener('click', ()=> {
+        const m = parseInt(el.dataset.min,10) || DEFAULT_MIN;
+        startFocus(m);
+      });
+    });
+
+    startBtn.addEventListener('click', ()=>{
+      // show a simple selector to change minutes (keep simple)
+      if(!timerInterval){
+        startFocus(DEFAULT_MIN);
+      }
+    });
+
+    pauseBtn.addEventListener('click', pauseFocus);
+    stopBtn.addEventListener('click', stopFocus);
+
+    // allow small inline change: click timer label to change default
+    timeLabel.addEventListener('click', ()=>{
+      const val = prompt('Set minutes for the session (e.g., 25)', focusMinutes);
+      const m = parseInt(val,10);
+      if(!isNaN(m) && m>0){
+        focusMinutes = m; totalSeconds = m*60; secondsLeft = totalSeconds;
+        timeLabel.textContent = formatTime(secondsLeft); setProgress();
+      }
+    });
+
+    // Try to grant audio permission by asking user to interact
+    document.body.addEventListener('click', function ensureAudio(e){
+      // we call play/pause to unlock audio on some browsers
+      chime.pause();
+      chime.currentTime = 0;
+      document.body.removeEventListener('click', ensureAudio);
+    }, {capture:true});
+
+    // Save tasks on unload
+    window.addEventListener('beforeunload', ()=> saveState());
+
+    // Init
+    renderTasks();
+    restoreState();
+    setProgress();
+
+    // small UX: show overlay if user tries to switch tabs during locked session
+    document.addEventListener('visibilitychange', ()=>{
+      if(document.hidden && locked){
+        // show overlay when they return to remind them
+        localStorage.setItem('harvona_warn_hidden', '1');
+      } else if(!document.hidden && locked){
+        if(localStorage.getItem('harvona_warn_hidden')){
+          showOverlay();
+          localStorage.removeItem('harvona_warn_hidden');
+        }
+      }
+    });
+
+    /* ======= NOTES / Developer hints:
+       - Replace the chime audio src with your own hosted file for production.
+       - For alarm persistence while screen is off / app in background, convert to a PWA or wrap into a WebView app (APK) — then native notifications / background playback is possible.
+       - This web build intentionally uses localStorage for simplicity (no server).
+    ======= */
+  </script>
 </body>
 </html>
