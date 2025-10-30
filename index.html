@@ -232,6 +232,50 @@
     <!-- If you host your own chime, replace the src above -->
   </audio>
 
+  <!-- ===== OneSignal SDK + helper (keeps the SDK ready and provides sendOneSignalNotification) ===== -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    // initialize OneSignal (uses your App ID)
+    window.OneSignal = window.OneSignal || [];
+    OneSignal.push(function() {
+      OneSignal.init({
+        appId: "08e970c3-2899-41e2-bf95-93a43f241ebf",
+        // remember: server-side notifications are sent from OneSignal dashboard or REST API
+      });
+    });
+
+    // Helper to send a notification to the current subscribed user.
+    // This uses OneSignal.sendSelfNotification when available (sends a push to this user).
+    // If the SDK or permission isn't available, it falls back to the browser Notification API.
+    function sendOneSignalNotification(title, message, url) {
+      // try OneSignal SDK method first
+      try {
+        if (window.OneSignal && typeof OneSignal.sendSelfNotification === 'function') {
+          // sendSelfNotification(title, message, url, icon, data)
+          OneSignal.sendSelfNotification(title || 'Harvona', message || '', url || window.location.href, null, {});
+          return;
+        }
+      } catch (e) {
+        console.warn('OneSignal sendSelfNotification failed:', e);
+      }
+
+      // fallback: use native Notification API if allowed
+      try {
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification(title || 'Harvona', { body: message || '' });
+        } else if ("Notification" in window && Notification.permission !== "denied") {
+          Notification.requestPermission().then(function(permission) {
+            if (permission === "granted") {
+              new Notification(title || 'Harvona', { body: message || '' });
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('Native Notification fallback failed:', e);
+      }
+    }
+  </script>
+
   <script>
     /* ======= App State & Utilities ======= */
     const DEFAULT_MIN = 25;
@@ -328,6 +372,8 @@
       setProgress();
       incrementStreak();
       showConfetti();
+      // send OneSignal notification to the user (persistent push)
+      sendOneSignalNotification('🎉 Great job!', 'Your focus session is complete. Take a short break.');
       exitFullscreen().catch(()=>{/*ignore*/});
       clearLockHistory();
       saveState();
@@ -480,6 +526,8 @@
 
       // try to play chime; requires prior user interaction in most browsers
       try{ chime.currentTime = 0; chime.play().catch(()=>{/* autoplay blocked; user must interact to hear */}); }catch(e){}
+      // send persistent OneSignal push for the task reminder
+      sendOneSignalNotification(`⏰ Time to study ${task.subject}`, `Let's get started.`);
       // keep playing until user clicks "I'm Ready!"
     }
     alarmStopBtn.addEventListener('click', ()=>{
